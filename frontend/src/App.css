@@ -1,0 +1,84 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f9f9fb;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+h1, h2 {
+  margin-top: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+ul li:last-child {
+  border-bottom: none;
+}
+
+.service-description {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 4px;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+input, select, textarea, button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #0077ff;
+}
+
+button {
+  background: #0077ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  background: #005fcc;
+}
+
+.message {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #e6f7e6;
+  color: #006600;
+}
+
+.error-message {
+  background: #ffe6e6;
+  color: #990000;
+}
