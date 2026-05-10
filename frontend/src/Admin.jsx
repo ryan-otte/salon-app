@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "./api";
 import dayjs from "dayjs";
 
 export default function Admin() {
@@ -16,10 +16,12 @@ export default function Admin() {
   const fetchAppointments = async () => {
     setLoading(true);
     setError("");
+
     try {
-      const r = await axios.get("/api/admin/appointments", {
+      const r = await api.get("/api/admin/appointments", {
         headers: { "x-admin-key": adminKey },
       });
+
       setAppointments(r.data);
     } catch (e) {
       setAppointments([]);
@@ -31,7 +33,7 @@ export default function Admin() {
 
   const fetchClosedDays = async () => {
     try {
-      const r = await axios.get("/api/closed-days");
+      const r = await api.get("/api/closed-days");
       setClosedDays(r.data);
     } catch {
       setClosedDays([]);
@@ -43,10 +45,17 @@ export default function Admin() {
       fetchAppointments();
       fetchClosedDays();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed]);
 
   const onLogin = () => {
     setError("");
+
+    if (!tempKey.trim()) {
+      setError("Please enter the admin password.");
+      return;
+    }
+
     localStorage.setItem("ADMIN_KEY", tempKey);
     setAdminKey(tempKey);
     setTempKey("");
@@ -61,10 +70,12 @@ export default function Admin() {
 
   const cancelAppointment = async (id) => {
     setError("");
+
     try {
-      await axios.patch(`/api/admin/appointments/${id}/cancel`, null, {
+      await api.patch(`/api/admin/appointments/${id}/cancel`, null, {
         headers: { "x-admin-key": adminKey },
       });
+
       await fetchAppointments();
     } catch (e) {
       setError(e.response?.data?.error || "Failed to cancel appointment");
@@ -73,10 +84,12 @@ export default function Admin() {
 
   const completeAppointment = async (id) => {
     setError("");
+
     try {
-      await axios.patch(`/api/admin/appointments/${id}/complete`, null, {
+      await api.patch(`/api/admin/appointments/${id}/complete`, null, {
         headers: { "x-admin-key": adminKey },
       });
+
       await fetchAppointments();
     } catch (e) {
       setError(e.response?.data?.error || "Failed to complete appointment");
@@ -85,14 +98,19 @@ export default function Admin() {
 
   const toggleClosedDay = async () => {
     setError("");
-    if (!closedDayInput) return;
+
+    if (!closedDayInput) {
+      setError("Please select a date first.");
+      return;
+    }
 
     try {
-      await axios.post(
+      await api.post(
         "/api/admin/closed-days/toggle",
         { day: closedDayInput },
         { headers: { "x-admin-key": adminKey } }
       );
+
       setClosedDayInput("");
       await fetchClosedDays();
     } catch (e) {
@@ -112,10 +130,15 @@ export default function Admin() {
             placeholder="Admin password"
             value={tempKey}
             onChange={(e) => setTempKey(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onLogin();
+            }}
           />
+
           <button type="button" onClick={onLogin}>
             Login
           </button>
+
           {error && <div className="alert">{error}</div>}
         </div>
       </div>
@@ -125,7 +148,14 @@ export default function Admin() {
   return (
     <>
       <div className="panel" style={{ marginTop: 22 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
           <h2 className="section-title" style={{ marginBottom: 0 }}>
             Upcoming Appointments
           </h2>
@@ -141,18 +171,34 @@ export default function Admin() {
           </div>
         </div>
 
-        {error && <div className="alert" style={{ marginTop: 12 }}>{error}</div>}
-        {loading && <p className="helper" style={{ marginTop: 12 }}>Loading…</p>}
+        {error && (
+          <div className="alert" style={{ marginTop: 12 }}>
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <p className="helper" style={{ marginTop: 12 }}>
+            Loading…
+          </p>
+        )}
 
         {!loading && appointments.length === 0 && (
-          <p className="helper" style={{ marginTop: 12 }}>No appointments found.</p>
+          <p className="helper" style={{ marginTop: 12 }}>
+            No appointments found.
+          </p>
         )}
 
         {!loading && appointments.length > 0 && (
           <div style={{ overflowX: "auto", marginTop: 14 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
               <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
+                <tr
+                  style={{
+                    textAlign: "left",
+                    borderBottom: "1px solid rgba(255,255,255,.12)",
+                  }}
+                >
                   <th style={{ padding: "10px 8px" }}>Date</th>
                   <th style={{ padding: "10px 8px" }}>Time</th>
                   <th style={{ padding: "10px 8px" }}>Service</th>
@@ -171,7 +217,10 @@ export default function Admin() {
                   const time = d.format("HH:mm");
 
                   return (
-                    <tr key={a.id} style={{ borderBottom: "1px solid rgba(255,255,255,.08)" }}>
+                    <tr
+                      key={a.id}
+                      style={{ borderBottom: "1px solid rgba(255,255,255,.08)" }}
+                    >
                       <td style={{ padding: "10px 8px" }}>{date}</td>
                       <td style={{ padding: "10px 8px" }}>{time}</td>
                       <td style={{ padding: "10px 8px" }}>{a.service?.name}</td>
@@ -187,6 +236,7 @@ export default function Admin() {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }}
+                        title={a.notes || ""}
                       >
                         {a.notes || "-"}
                       </td>
@@ -212,13 +262,18 @@ export default function Admin() {
       <div className="panel" style={{ marginTop: 22 }}>
         <h2 className="section-title">Availability</h2>
 
-        <div className="form">
+        <p className="helper">
+          Select a date and toggle it closed/open. Closed dates will not be bookable.
+        </p>
+
+        <div className="form" style={{ marginTop: 12 }}>
           <div className="row">
             <input
               type="date"
               value={closedDayInput}
               onChange={(e) => setClosedDayInput(e.target.value)}
             />
+
             <button type="button" onClick={toggleClosedDay}>
               Toggle Closed Day
             </button>
@@ -229,12 +284,14 @@ export default function Admin() {
           <ul className="policies" style={{ marginTop: 12 }}>
             {closedDays.map((d) => (
               <li key={d.id || d.day} className="policy">
-                {d.day}
+                {dayjs(d.day).isValid() ? dayjs(d.day).format("DD/MM/YYYY") : d.day}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="helper" style={{ marginTop: 12 }}>No closed days set.</p>
+          <p className="helper" style={{ marginTop: 12 }}>
+            No closed days set.
+          </p>
         )}
       </div>
     </>

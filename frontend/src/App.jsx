@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "./api";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import "./App.css";
@@ -17,23 +17,22 @@ function HomePage() {
   const [serviceCategory, setServiceCategory] = useState("MENS");
 
   useEffect(() => {
-    axios.get("/api/services").then((r) => setServices(r.data));
+    api.get("/api/services").then((r) => setServices(r.data));
   }, []);
 
   useEffect(() => {
-    axios
+    api
       .get("/api/closed-days")
       .then((r) => setClosedDates(r.data.map((item) => item.day)))
       .catch(() => setClosedDates([]));
   }, []);
 
   const {
-  register,
-  watch,
-  handleSubmit,
-  formState: { errors },
-} = useForm({
-  
+    register,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       name: "",
       email: "",
@@ -63,7 +62,7 @@ function HomePage() {
     const from = dayjs(selectedDate).startOf("day").toISOString();
     const to = dayjs(selectedDate).endOf("day").toISOString();
 
-    axios
+    api
       .get("/api/appointments", { params: { from, to } })
       .then((r) => setAppointments(r.data))
       .catch(() => setAppointments([]));
@@ -120,7 +119,7 @@ function HomePage() {
     }
 
     try {
-      const response = await axios.post("/api/create-checkout-session", {
+      const response = await api.post("/api/create-checkout-session", {
         customer: {
           name: data.name,
           email: data.email,
@@ -145,19 +144,15 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero */}
       <div className="hero">
         <img src="/logo-eb.png" alt="EB StyledIt logo" className="hero-logo" />
 
         <div>
           <div className="hero-title">EB StyledIt</div>
-          <div className="hero-sub">
-            Luxury Hair Atelier • @eb.styleditt
-          </div>
+          <div className="hero-sub">Luxury Hair Atelier • @eb.styleditt</div>
         </div>
       </div>
 
-      {/* Price List */}
       <section className="panel" style={{ marginBottom: 22 }}>
         <h2 className="section-title">Price List</h2>
 
@@ -174,17 +169,13 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Booking */}
       <section className="panel" id="book">
         <h2 className="section-title">Book Now</h2>
 
-        {/* Category Tabs */}
         <div className="service-tabs">
           <button
             type="button"
-            className={`service-tab ${
-              serviceCategory === "MENS" ? "active" : ""
-            }`}
+            className={`service-tab ${serviceCategory === "MENS" ? "active" : ""}`}
             onClick={() => setServiceCategory("MENS")}
           >
             Mens
@@ -192,9 +183,7 @@ function HomePage() {
 
           <button
             type="button"
-            className={`service-tab ${
-              serviceCategory === "WOMENS" ? "active" : ""
-            }`}
+            className={`service-tab ${serviceCategory === "WOMENS" ? "active" : ""}`}
             onClick={() => setServiceCategory("WOMENS")}
           >
             Womens
@@ -208,7 +197,6 @@ function HomePage() {
         )}
 
         <form className="form" onSubmit={handleSubmit(onSubmit)}>
-          {/* Name */}
           <div className="row">
             <input
               placeholder="Your name"
@@ -218,7 +206,6 @@ function HomePage() {
             />
           </div>
 
-          {/* Email + Phone */}
           <div className="row">
             <div style={{ flex: 1 }}>
               <input
@@ -255,7 +242,6 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Services */}
           <select
             {...register("serviceId", {
               required: "Please select a service",
@@ -270,19 +256,14 @@ function HomePage() {
             ))}
           </select>
 
-          {/* Date + Time */}
           <div className="row">
             <input
               type="date"
               {...register("date", { required: true })}
               min={dayjs().format("YYYY-MM-DD")}
               style={{
-                color: closedDates.includes(selectedDate)
-                  ? "red"
-                  : "inherit",
-                borderColor: closedDates.includes(selectedDate)
-                  ? "red"
-                  : "inherit",
+                color: closedDates.includes(selectedDate) ? "red" : "inherit",
+                borderColor: closedDates.includes(selectedDate) ? "red" : "inherit",
               }}
             />
 
@@ -305,60 +286,38 @@ function HomePage() {
             selectedService &&
             !closedDates.includes(selectedDate) &&
             availableTimes.length === 0 && (
-              <p className="helper">
-                No available time slots for this date.
-              </p>
+              <p className="helper">No available time slots for this date.</p>
             )}
 
-          {/* Notes */}
           <textarea
             rows={4}
             placeholder="Notes for your stylist…"
             {...register("notes")}
           />
 
-          {/* Submit */}
           <button type="submit">Pay £10 Deposit</button>
 
           {message && <div className="alert">{message}</div>}
         </form>
       </section>
 
-      {/* Policies */}
       <section className="panel" style={{ marginTop: 22 }}>
         <h2 className="section-title">Policies</h2>
 
         <ul className="policies">
           <li className="policy">
-            £10 non-refundable deposit (deducted from total). Remainder paid
-            in cash.
+            £10 non-refundable deposit (deducted from total). Remainder paid in cash.
           </li>
-
           <li className="policy">
             Hair must be washed, clean and detangled — extra fees otherwise.
           </li>
-
+          <li className="policy">If blow-drying is required, please select that option.</li>
+          <li className="policy">DM for any alternative hairstyles not listed.</li>
           <li className="policy">
-            If blow-drying is required, please select that option.
+            £10 late fee after 15 minutes; after 30 minutes the appointment is cancelled.
           </li>
-
-          <li className="policy">
-            DM for any alternative hairstyles not listed.
-          </li>
-
-          <li className="policy">
-            £10 late fee after 15 minutes; after 30 minutes the appointment is
-            cancelled.
-          </li>
-
-          <li className="policy">
-            No plus ones unless discussed.
-          </li>
-
-          <li className="policy">
-            48-hour notice for cancellations.
-          </li>
-
+          <li className="policy">No plus ones unless discussed.</li>
+          <li className="policy">48-hour notice for cancellations.</li>
           <li className="policy">
             For women's styles, extensions brought must be pre-stretched.
           </li>
@@ -372,14 +331,8 @@ function HomePage() {
           <li className="policy">
             Hair can be provided — price depends on number of packs and style.
           </li>
-
-          <li className="policy">
-            Blow-drying is free.
-          </li>
-
-          <li className="policy">
-            Custom colour for extensions: +£10.
-          </li>
+          <li className="policy">Blow-drying is free.</li>
+          <li className="policy">Custom colour for extensions: +£10.</li>
         </ul>
       </section>
     </>
@@ -398,27 +351,14 @@ export default function App() {
       <div className="wrapper">
         <Routes>
           <Route path="/" element={<HomePage />} />
-
-          <Route
-            path="/booking-success"
-            element={<BookingSuccess />}
-          />
-
-          <Route
-            path="/booking-cancelled"
-            element={<BookingCancelled />}
-          />
-
+          <Route path="/booking-success" element={<BookingSuccess />} />
+          <Route path="/booking-cancelled" element={<BookingCancelled />} />
           <Route
             path="/admin"
             element={
               <>
                 <div style={{ marginBottom: 16 }}>
-                  <Link
-                    to="/"
-                    className="helper"
-                    style={{ textDecoration: "none" }}
-                  >
+                  <Link to="/" className="helper" style={{ textDecoration: "none" }}>
                     ← Back to booking
                   </Link>
                 </div>
