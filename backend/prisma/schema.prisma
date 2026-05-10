@@ -24,26 +24,32 @@ model Staff {
   appointments Appointment[]
 }
 
+enum ServiceCategory {
+  MENS
+  WOMENS
+}
+
 model Service {
-  id           Int           @id @default(autoincrement())
+  id           Int              @id @default(autoincrement())
   name         String
   durationMin  Int
   priceCents   Int
-  active       Boolean       @default(true)
+  active       Boolean          @default(true)
+  category     ServiceCategory  @default(MENS)
   appointments Appointment[]
 }
 
 model Appointment {
-  id         Int                 @id @default(autoincrement())
-  customer   Customer            @relation(fields: [customerId], references: [id])
+  id         Int               @id @default(autoincrement())
+  customer   Customer          @relation(fields: [customerId], references: [id])
   customerId Int
-  staff      Staff               @relation(fields: [staffId], references: [id])
+  staff      Staff             @relation(fields: [staffId], references: [id])
   staffId    Int
-  service    Service             @relation(fields: [serviceId], references: [id])
+  service    Service           @relation(fields: [serviceId], references: [id])
   serviceId  Int
   startTs    DateTime
   endTs      DateTime
-  status     AppointmentStatus   @default(SCHEDULED)
+  status     AppointmentStatus @default(SCHEDULED)
   notes      String?
 
   @@index([staffId, startTs])
@@ -54,4 +60,10 @@ enum AppointmentStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+}
+
+model ClosedDay {
+  id   Int      @id @default(autoincrement())
+  day  DateTime @unique // store midnight UTC for that day
+  note String?
 }

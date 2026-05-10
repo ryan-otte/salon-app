@@ -8,17 +8,24 @@
     "start": "node src/server.js",
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "prisma:seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.20",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "nodemailer": "^8.0.1",
+    "stripe": "^22.0.1",
     "zod": "^4.0.17"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
     "prisma": "^6.14.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
